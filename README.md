@@ -1,6 +1,6 @@
-# Title
+# Matrix
 
-Some description
+Repository contains Matrix class, which provides operations for handling matrix operations.
 
 ---
 
