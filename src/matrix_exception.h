@@ -41,6 +41,13 @@ namespace matrix {
 		const std::string& what() const override { return message_; };
 	};
 
+	// Exception for calculating the determinant for non-square matrices
+	class DetDoesNotExist : public MatrixExceptions {
+	public:
+		DetDoesNotExist() { message_ = "Determinant can not be calculated for non-square matrices.\n"; }
+		const std::string& what() const override { return message_; };
+	};
+
 	// Exception for situation when lower bound is greater than upper
 	class IncorrectBoundsForRandom : public MatrixExceptions {
 	public:

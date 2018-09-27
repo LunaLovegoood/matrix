@@ -11,6 +11,7 @@
 
 namespace matrix {
 
+	// MatrixDetail contains additional information about matrix
 	struct MatrixDetail {
 		bool is_init_{ false };
 		bool is_square_{ false };

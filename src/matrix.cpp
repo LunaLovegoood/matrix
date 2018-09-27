@@ -37,8 +37,9 @@ namespace matrix {
 
 	// Move constructor
 	Matrix::Matrix(Matrix &&matrix)
-		: matrix_(matrix.matrix_), rows_(matrix.rows_), cols_(matrix.cols_), details_(matrix.details_), det_(matrix.det_)
-	{
+	: matrix_(matrix.matrix_), rows_(matrix.rows_), cols_(matrix.cols_), 
+	  details_(matrix.details_), det_(std::move(matrix.det_)) {
+
 		matrix.set_default();
 	}
 
@@ -127,7 +128,7 @@ namespace matrix {
 		rows_ = matrix.rows_;
 		cols_ = matrix.cols_;
 		details_ = matrix.details_;
-		det_ = matrix.det_;
+		det_ = std::move(matrix.det_);
 
 		matrix.set_default();
 
@@ -550,6 +551,37 @@ namespace matrix {
 		return result;
 	}
 
+	// Returns determinant of the matrix
+	double Matrix::det() {
+
+		if (!det_) {
+
+			if (!details_.is_square_) {
+				throw DetDoesNotExist();
+				return 0.0;
+			}
+
+			det_.reset(new double(calculate_det()));
+		}
+
+		return (*det_);
+	}
+
+	// Calculates determinant of the matrix
+	double Matrix::calculate_det() {
+
+		double result = 0.0;
+
+		if (details_.is_triangular_) {
+			for (int i = 0, result = 1.0; i < rows_; i++)
+				result *= matrix_[i][i];
+			return result;
+		}
+		
+		// TODO: implement common determinant
+		return 0.0;
+	}
+
 	// Returns merged matrix
 	Matrix Matrix::merge(const Matrix &matrix) const {
 		
@@ -644,7 +676,7 @@ namespace matrix {
 		details_ = {};
 		rows_ = 0;
 		cols_ = 0;
-		det_ = 0;
+		det_.reset();
 	}
 
 	// Frees up allocated for matrix_ space
@@ -665,8 +697,8 @@ namespace matrix {
 
 		rows_ = matrix.rows_;
 		cols_ = matrix.cols_;
-		det_ = matrix.det_;
 		details_ = matrix.details_;
+		det_.reset(new double(*(matrix.det_)));
 
 		try {
 			allocate_memory();

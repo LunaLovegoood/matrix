@@ -10,6 +10,7 @@
 #include "matrix_exception.h"
 
 #include <iostream>
+#include <memory>
 
 
 namespace {
@@ -23,7 +24,7 @@ namespace matrix {
 	class Matrix {
 
 	public:
-		Matrix() = default;
+		Matrix() {}
 		Matrix(const Matrix &matrix);
 		Matrix(Matrix &&matrix);
 		Matrix(int rows, int cols, bool random = false, long lower_bound = 0, long upper_bound = 1);
@@ -32,6 +33,7 @@ namespace matrix {
 
 		Matrix hadm_product(const Matrix &matrix) const;
 		Matrix transpose() const;
+		double det();
 		Matrix merge(const Matrix &matrix) const;
 		void map(MapFunc map_function);
 		void fill(const double &arg);
@@ -92,7 +94,7 @@ namespace matrix {
 		MatrixDetail details_{};
 		int precision_{ 10 };
 
-		double det_{ 0 };
+		std::unique_ptr<double> det_{ nullptr };
 
 		// Returns true if given matrix is appropriate for addition or subtraction
 		bool is_correct_dimensions(const Matrix &arg) const {
@@ -106,6 +108,8 @@ namespace matrix {
 		bool are_initialized(const Matrix &arg) const {
 			return ((details_.is_init_) && (arg.is_init()));
 		}
+
+		double calculate_det();
 
 		void set_default();
 
