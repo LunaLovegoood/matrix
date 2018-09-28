@@ -33,26 +33,27 @@ namespace matrix {
 
 		Matrix hadm_product(const Matrix &matrix) const;
 		Matrix transpose() const;
-		double det();
-		Matrix merge(const Matrix &matrix) const;
+		double det() const;
 		void map(MapFunc map_function);
+
+		Matrix merge(const Matrix &matrix) const;
 		void fill(const double &arg);
 		void fill_random(long lower_bound = 0, long upper_bound = 1);
 		void set_element(int row, int col, const double &number);
 		void copy(const Matrix &matrix);
 
-		int get_rows() const { return rows_; }
-		int get_cols() const { return cols_; }
-		int get_precision() const { return precision_; }
+		int get_rows() const noexcept { return rows_; }
+		int get_cols() const noexcept { return cols_; }
+		int get_precision() const noexcept { return precision_; }
 
 		// Sets matrix precision for output to given precision if it is greater than 0 and less or equal than 25,
 		// otherwise precision remains unchanged
-		void set_precision(int precision) {
+		void set_precision(int precision) noexcept {
 			if (precision > 0 && precision <= 25)
 				precision_ = precision;
 		}
 
-		bool is_init() const { return details_.is_init_; }
+		bool is_init() const noexcept { return details_.is_init_; }
 
 		Matrix& operator=(const Matrix &matrix);
 		Matrix& operator=(Matrix &&matrix);
@@ -94,26 +95,26 @@ namespace matrix {
 		MatrixDetail details_{};
 		int precision_{ 10 };
 
-		std::unique_ptr<double> det_{ nullptr };
+		mutable std::unique_ptr<double> det_{ nullptr };
 
 		// Returns true if given matrix is appropriate for addition or subtraction
-		bool is_correct_dimensions(const Matrix &arg) const {
+		bool is_correct_dimensions(const Matrix &arg) const noexcept {
 			return ((rows_ == arg.rows_) && (cols_ == arg.cols_));
 		}
 		// Returns true if given matrix is appropriate for multiplication
-		bool is_correct_mult_dimensions(const Matrix &arg) const {
+		bool is_correct_mult_dimensions(const Matrix &arg) const noexcept {
 			return (cols_ == arg.rows_);
 		}
 		// Returns true if calling and given matrix are initialized
-		bool are_initialized(const Matrix &arg) const {
+		bool are_initialized(const Matrix &arg) const noexcept {
 			return ((details_.is_init_) && (arg.is_init()));
 		}
 
-		double calculate_det();
+		double calculate_det() const noexcept;
 
-		void set_default();
+		void set_default() noexcept;
 
-		void free_matrix();
+		void free_matrix() noexcept;
 		void allocate_memory();
 	};
 

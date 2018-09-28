@@ -48,7 +48,7 @@ namespace matrix {
 		const std::string& what() const override { return message_; };
 	};
 
-	// Exception for situation when lower bound is greater than upper
+	// Exception for situation when lower bound for random is greater than upper
 	class IncorrectBoundsForRandom : public MatrixExceptions {
 	public:
 		IncorrectBoundsForRandom() { message_ = "Lower bound is greater than upper bound.\n"; }

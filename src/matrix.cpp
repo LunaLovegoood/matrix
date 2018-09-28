@@ -26,6 +26,7 @@ namespace matrix {
 	//
 
 	// Copy constructor
+	// Throws: std::bad_alloc
 	Matrix::Matrix(const Matrix &matrix) {
 		try {
 			copy(matrix);
@@ -48,6 +49,8 @@ namespace matrix {
 	// If random is set to true: matrix will be filled with random numbers, otherwise: with zeros
 	// lower_bound and upper_bound set min and max values for possible random numbers
 	// By default: random = false, lower_bound = 0, upper_bound = 1
+	// Throws: std::bad_alloc,
+	//         IncorrectBoundsForRandom
 	Matrix::Matrix(int rows, int cols, bool random, long lower_bound, long upper_bound)
 		: rows_(rows), cols_(cols) {
 
@@ -72,6 +75,7 @@ namespace matrix {
 	// Constructor
 	// rows and cols represent respectively number of rows and columns in matrix
 	// matrix is an 2d array which content is to be assigned to class member matrix_
+	// Throws: std::bad_alloc
 	Matrix::Matrix(int rows, int cols, double **matrix)
 		: rows_(rows), cols_(cols) {
 
@@ -105,6 +109,8 @@ namespace matrix {
 	//
 	//
 
+	// Copy assignment
+	// Throws: std::bad_alloc
 	Matrix& Matrix::operator=(const Matrix &matrix) {
 
 		try {
@@ -118,6 +124,7 @@ namespace matrix {
 		return *this;
 	}
 
+	// Move assignment
 	Matrix& Matrix::operator=(Matrix &&matrix) {
 
 		if (&matrix == this) return *this;
@@ -135,6 +142,9 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for adding matrix
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix& Matrix::operator+=(const Matrix &matrix) {
 
 		try {
@@ -147,6 +157,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for adding number
+	// Throws: UninitializedMatrix
 	Matrix& Matrix::operator+=(const double &arg) {
 
 		try {
@@ -159,6 +171,9 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for subtracting Matrix
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix& Matrix::operator-=(const Matrix &matrix) {
 
 		try {
@@ -171,6 +186,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for subtracting number
+	// Throws: UninitializedMatrix
 	Matrix& Matrix::operator-=(const double &arg) {
 
 		try {
@@ -183,6 +200,9 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for multiplying by matrix
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix& Matrix::operator*=(const Matrix &matrix) {
 
 		try {
@@ -195,6 +215,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for multuplying by number
+	// Throws: UninitializedMatrix
 	Matrix& Matrix::operator*=(const double &arg) {
 
 		try {
@@ -207,6 +229,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Shorthand assignment for dividing by number
+	// Throws: UninitializedMatrix
 	Matrix& Matrix::operator/=(const double &arg) {
 
 		try {
@@ -219,6 +243,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Prefix increment
+	// Throws: UninitializedMatrix
 	Matrix& Matrix::operator++() {
 
 		if (!details_.is_init_) {
@@ -233,6 +259,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Postfix increment
+	// Throws: UninitializedMatrix
 	Matrix Matrix::operator++(int x) {
 
 		if (!details_.is_init_) {
@@ -246,6 +274,8 @@ namespace matrix {
 		return temp;
 	}
 
+	// Prefix decrement
+	// Throws: UninitializedMatrix
 	Matrix& Matrix::operator--() {
 
 		if (!details_.is_init_) {
@@ -260,6 +290,8 @@ namespace matrix {
 		return *this;
 	}
 
+	// Postfix decrement
+	// Throws: UninitializedMatrix
 	Matrix Matrix::operator--(int x) {
 
 		if (!details_.is_init_) {
@@ -274,6 +306,8 @@ namespace matrix {
 	}
 
 	// Returns sum matrix of calling and arg matrices
+	// Throws: UninitializedMatrix,
+	//	       IncorrectDimensions
 	Matrix Matrix::operator+(const Matrix &matrix) const {
 
 		if (!are_initialized(matrix)) {
@@ -295,6 +329,8 @@ namespace matrix {
 	}
 
 	// Returns difference between calling matrix and arg matrix
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix Matrix::operator-(const Matrix &matrix) const {
 
 		if (!are_initialized(matrix)) {
@@ -316,6 +352,8 @@ namespace matrix {
 	}
 
 	// Returns product of calling and arg matrices
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix Matrix::operator*(const Matrix &matrix) const {
 
 		if (!are_initialized(matrix)) {
@@ -340,6 +378,7 @@ namespace matrix {
 	}
 
 	// Returns matrix in which each element has an opposite sign
+	// Throws: UninitializedMatrix
 	Matrix Matrix::operator-() const {
 
 		if (!details_.is_init_) {
@@ -363,6 +402,7 @@ namespace matrix {
 	//
 
 	// Returns sum matrix of calling matrix and number
+	// Throws: UninitializedMatrix
 	Matrix operator+(const double &number, const Matrix &matrix) {
 
 		if (!matrix.is_init()) {
@@ -380,6 +420,7 @@ namespace matrix {
 	}
 
 	// Returns sum matrix of calling matrix and number
+	// Throws: UninitializedMatrix
 	Matrix operator+(const Matrix &matrix, const double &number) {
 		try {
 			return (number + matrix);
@@ -391,6 +432,7 @@ namespace matrix {
 	}
 
 	// Returns difference between calling matrix and number
+	// Throws: UninitializedMatrix
 	Matrix operator-(const double &number, const Matrix &matrix) {
 		try {
 			return ((-matrix) + number);
@@ -402,6 +444,7 @@ namespace matrix {
 	}
 
 	// Returns difference between calling matrix and number
+	// Throws: UninitializedMatrix
 	Matrix operator-(const Matrix &matrix, const double &number) {
 
 		if (!matrix.is_init()) {
@@ -419,6 +462,7 @@ namespace matrix {
 	}
 
 	// Returns product of calling matrix and number
+	// Throws: UninitializedMatrix
 	Matrix operator*(const double &number, const Matrix &matrix) {
 
 		if (!matrix.is_init()) {
@@ -436,6 +480,7 @@ namespace matrix {
 	}
 
 	// Returns product of calling matrix and number
+	// Throws: UninitializedMatrix
 	Matrix operator*(const Matrix &matrix, const double &number) {
 		try {
 			return (number * matrix);
@@ -447,6 +492,7 @@ namespace matrix {
 	}
 
 	// // Returns matrix with every element divided by number
+	// Throws: UninitializedMatrix
 	Matrix operator/(const Matrix &matrix, const double &number) {
 
 		if (!matrix.is_init()) {
@@ -463,6 +509,8 @@ namespace matrix {
 		return result;
 	}
 
+	// Outputs matrix with previously set or default precision
+	// Throws: UninitializedMatrix
 	std::ostream& operator<<(std::ostream &stream, const Matrix &matrix) {
 
 		if (!matrix.is_init()) {
@@ -486,6 +534,8 @@ namespace matrix {
 		return stream;
 	}
 
+	// Reads matrix
+	// Throws: std::bad_alloc
 	std::istream& operator>>(std::istream &stream, Matrix &matrix) {
 
 		matrix.free_matrix();
@@ -514,6 +564,8 @@ namespace matrix {
 	//
 
 	// Returns Hadamard product of calling matrix and arg (calling object unchanged)
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix Matrix::hadm_product(const Matrix &matrix) const {
 
 		if (!are_initialized(matrix)) {
@@ -535,6 +587,7 @@ namespace matrix {
 	}
 
 	// Returns transposed matrix of calling one (calling object unchanged)
+	// Throws: UninitializedMatrix
 	Matrix Matrix::transpose() const {
 
 		if (!details_.is_init_) {
@@ -552,15 +605,20 @@ namespace matrix {
 	}
 
 	// Returns determinant of the matrix
-	double Matrix::det() {
+	// Throws: UninitializedMatrix,
+	//         DetDoesNotExist
+	double Matrix::det() const {
+
+		if (!details_.is_init_) {
+			throw UninitializedMatrix();
+			return {};
+		}
+		else if (!details_.is_square_) {
+			throw DetDoesNotExist();
+			return {};
+		}
 
 		if (!det_) {
-
-			if (!details_.is_square_) {
-				throw DetDoesNotExist();
-				return 0.0;
-			}
-
 			det_.reset(new double(calculate_det()));
 		}
 
@@ -568,7 +626,7 @@ namespace matrix {
 	}
 
 	// Calculates determinant of the matrix
-	double Matrix::calculate_det() {
+	double Matrix::calculate_det() const noexcept {
 
 		double result = 0.0;
 
@@ -583,6 +641,8 @@ namespace matrix {
 	}
 
 	// Returns merged matrix
+	// Throws: UninitializedMatrix,
+	//         IncorrectDimensions
 	Matrix Matrix::merge(const Matrix &matrix) const {
 		
 		if (!are_initialized(matrix)) {
@@ -608,6 +668,7 @@ namespace matrix {
 	}
 
 	// Applies given function to each element of calling matrix
+	// Throws: UninitializedMatrix
 	void Matrix::map(MapFunc map_function) {
 
 		if (!details_.is_init_) {
@@ -621,6 +682,7 @@ namespace matrix {
 	}
 
 	// Fills matrix with given arg number
+	// Throws: UninitializedMatrix
 	void Matrix::fill(const double &arg) {
 
 		if (!details_.is_init_) {
@@ -634,6 +696,8 @@ namespace matrix {
 	}
 
 	// Fills matrix with random values in the interval between lower_bound and upper_bound
+	// Throws: UninitializedMatrix,
+	//         IncorrectBoundsForRandom
 	void Matrix::fill_random(long lower_bound, long upper_bound) {
 
 		if (!details_.is_init_) {
@@ -654,6 +718,8 @@ namespace matrix {
 	}
 
 	// Sets number on the position defined by row and col arguments
+	// Throws: UninitializedMatrix,
+	//         MatrixOutOfBounds
 	void Matrix::set_element(int row, int col, const double &number) {
 
 		if (!details_.is_init_) {
@@ -670,7 +736,7 @@ namespace matrix {
 	}
 
 	// Sets default values to matrix members
-	void Matrix::set_default() {
+	void Matrix::set_default() noexcept {
 
 		matrix_ = nullptr;
 		details_ = {};
@@ -680,7 +746,7 @@ namespace matrix {
 	}
 
 	// Frees up allocated for matrix_ space
-	void Matrix::free_matrix() {
+	void Matrix::free_matrix() noexcept {
 
 		if (details_.is_init_)
 		{
@@ -693,6 +759,7 @@ namespace matrix {
 	}
 
 	// Copies given matrix arg into invoking one
+	// Throws: std::bad_alloc
 	void Matrix::copy(const Matrix &matrix) {
 
 		rows_ = matrix.rows_;
@@ -708,13 +775,13 @@ namespace matrix {
 					matrix_[i][j] = matrix.matrix_[i][j];
 		}
 		catch (const std::bad_alloc &e) {
-			std::cerr << "Memory allocation error: " << e.what() << std::endl;
 			matrix_ = nullptr;
 			throw;
 		}
 	}
 
 	// Allocates memory for matrix
+	// Throws: std::bad_alloc
 	void Matrix::allocate_memory() {
 
 		try {
