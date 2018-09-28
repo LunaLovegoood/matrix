@@ -10,18 +10,18 @@
 
 namespace matrix {
 
-	std::ostream& operator<<(std::ostream &stream, const MatrixDetail &details) {
+    std::ostream& operator<<(std::ostream &stream, const MatrixDetail &details) {
 
-		stream << details.is_init_ << " " << details.is_square_ << " " << details.is_triangular_;
+        stream << details.is_init_ << " " << details.is_square_ << " " << details.is_triangular_;
 
-		return stream;
-	}
+        return stream;
+    }
 
-	std::istream& operator>>(std::istream &stream, MatrixDetail &details) {
+    std::istream& operator>>(std::istream &stream, MatrixDetail &details) {
 
-		stream >> details.is_init_ >> details.is_square_ >> details.is_triangular_;
+        stream >> details.is_init_ >> details.is_square_ >> details.is_triangular_;
 
-		return stream;
-	}
+        return stream;
+    }
 
 }

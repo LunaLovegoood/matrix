@@ -11,24 +11,24 @@
 
 namespace matrix {
 
-	// MatrixDetail contains additional information about matrix
-	struct MatrixDetail {
-		bool is_init_{ false };
-		bool is_square_{ false };
-		bool is_triangular_{ false };
+    // MatrixDetail contains additional information about matrix
+    struct MatrixDetail {
+        bool is_init_{ false };
+        bool is_square_{ false };
+        bool is_triangular_{ false };
 
-		MatrixDetail() = default;
-		~MatrixDetail() = default;
+        MatrixDetail() = default;
+        ~MatrixDetail() = default;
 
-		MatrixDetail(const MatrixDetail &arg) = default;
-		MatrixDetail(MatrixDetail &&arg) = default;
+        MatrixDetail(const MatrixDetail &arg) = default;
+        MatrixDetail(MatrixDetail &&arg) = default;
 
-		MatrixDetail& operator=(const MatrixDetail &arg) = default;
-		MatrixDetail& operator=(MatrixDetail &&arg) = default;
+        MatrixDetail& operator=(const MatrixDetail &arg) = default;
+        MatrixDetail& operator=(MatrixDetail &&arg) = default;
 
-		friend std::ostream& operator<<(std::ostream &stream, const MatrixDetail &details);
-		friend std::istream& operator>>(std::istream &stream, MatrixDetail &details);
-	};
+        friend std::ostream& operator<<(std::ostream &stream, const MatrixDetail &details);
+        friend std::istream& operator>>(std::istream &stream, MatrixDetail &details);
+    };
 
 }
 
