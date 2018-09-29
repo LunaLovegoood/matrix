@@ -8,7 +8,7 @@ using namespace matrix;
 
 ### Creating an instance of Matrix
 
-Matrix can be created in one of the following ways:
+**Matrix** can be created in one of the following ways:
 ```cpp
 // creates empty Matrix
 Matrix default_matrix(); 
@@ -49,7 +49,18 @@ matrix.transpose(); // return transposed matrix
 matrix.map(map_function); // applies map_function to every element of the matrix
 ```
 
-Comparison operators are deleted for Matrix.
+All comparison operators are **deleted**.
+
+### Additional functions
+
+**Matrix** contains a few additional functions, which can be helpful in certain situations:
+```cpp
+matrix.merge(another_matrix); // returns matrix created with merging of two matrices
+matrix.fill(number); // fills matrix with number
+matrix.fill_random(lower_bound, upper_bound); // fill matrix with random number (by default in the interval [0,1])
+matrix.set_element(row, col, new_value); // sets new_value to matrix element with indices row and col
+matrix.copy(another_matrix); // deletes previous matrix and copies another_matrix to matrix
+```
 
 ---
 
