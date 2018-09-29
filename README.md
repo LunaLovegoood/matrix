@@ -6,7 +6,7 @@ In the following samples, I'll suppose you've added next line to your code:
 using namespace matrix;
 ```
 
-### Creating instance of Matrix
+### Creating an instance of Matrix
 
 Matrix can be created in one of the following ways:
 ```cpp
@@ -25,6 +25,31 @@ Matrix zeros = Matrix::zeros(5); // creates zero matrix of order 5
 Matrix ones = Matrix::ones(5); // creates matrix of order 5 filled with ones
 Matrix identity = Matrix::identity(5); // creates identity matrix of order 5
 ```
+
+### Matrix operations
+
+Here's samples of common matrix operations (shorthand assignment versions are also available):
+```cpp
+matrix + 5; // adds 5 to the matrix
+matrix + another_matrix; // adds two matrices
+
+matrix - 5; // subtracts 5 from the matrix
+matrix - another_matrix; // subtracts another_matrix from matrix
+
+matrix * 5; // multiplies matrix by 5
+matrix * another_matrix; // multiplies matrix by another_matrix
+
+matrix / 5; // divides matrix by 5
+```
+
+Other matrix operations can be performed using member-functions:
+```cpp
+matrix.hadm_product(another_matrix); // returns Hadamard product of two matrices
+matrix.transpose(); // return transposed matrix
+matrix.map(map_function); // applies map_function to every element of the matrix
+```
+
+Comparison operators are deleted for Matrix.
 
 ---
 
