@@ -12,6 +12,7 @@
 
 namespace {
     using MapFunc = double(*)(double);
+
     using random_engine = std::mt19937;
     using uniform_distribution = std::uniform_real_distribution<double>;
 }
@@ -52,15 +53,18 @@ namespace matrix {
     // Throws: std::bad_alloc,
     //         IncorrectBoundsForRandom
     Matrix::Matrix(int rows, int cols, bool random, long lower_bound, long upper_bound)
-        : rows_(rows), cols_(cols) {
+    : rows_(rows), cols_(cols) {
 
         details_.is_init_ = true;
 
         try {
-            allocate_memory();
 
             if (random) {
+                allocate_memory(false);
                 fill_random(lower_bound, upper_bound);
+            }
+            else {
+                allocate_memory();
             }
         }
         catch (const std::bad_alloc &e) {
@@ -77,12 +81,12 @@ namespace matrix {
     // matrix is an 2d array which content is to be assigned to class member matrix_
     // Throws: std::bad_alloc
     Matrix::Matrix(int rows, int cols, double **matrix)
-        : rows_(rows), cols_(cols) {
+    : rows_(rows), cols_(cols) {
 
         details_.is_init_ = true;
 
         try {
-            allocate_memory();
+            allocate_memory(false);
 
             for (int i = 0; i < rows; i++)
                 for (int j = 0; j < cols; j++)
@@ -95,6 +99,42 @@ namespace matrix {
 
         if (rows == cols)
             details_.is_square_ = true;
+    }
+
+    // Construct special square matrix
+    // Throws: std::bad_alloc
+    Matrix::Matrix(int order, SpecType spec_type) 
+    : rows_(order), cols_(order) {
+
+        details_.is_init_ = true;
+        details_.is_square_ = true;
+
+        try {
+            switch (spec_type) {
+            case SpecType::ZERO: // Creates zeros matrix
+                allocate_memory();
+                break;
+
+            case SpecType::ONE: // Creates ones matrix
+                allocate_memory(false);
+
+                for (int i = 0; i < order; i++)
+                    for (int j = 0; j < order; j++)
+                        matrix_[i][j] = 1.0;
+                break;
+
+            case SpecType::IDENTITY: // Creates identity matrix
+                allocate_memory();
+
+                for (int i = 0; i < order; i++)
+                    matrix_[i][i] = 1.0;
+                break;
+            }
+        }
+        catch (const std::bad_alloc &e) {
+            throw e;
+            return;
+        }
     }
 
     // Destructor
@@ -563,7 +603,7 @@ namespace matrix {
     //
     //
 
-    // Returns Hadamard product of calling matrix and arg (calling object unchanged)
+    // Returns Hadamard product of calling matrix and arg
     // Throws: UninitializedMatrix,
     //         IncorrectDimensions
     Matrix Matrix::hadm_product(const Matrix &matrix) const {
@@ -586,7 +626,7 @@ namespace matrix {
         return result;
     }
 
-    // Returns transposed matrix of calling one (calling object unchanged)
+    // Returns transposed matrix of calling one
     // Throws: UninitializedMatrix
     Matrix Matrix::transpose() const {
 
@@ -627,11 +667,11 @@ namespace matrix {
 
     // Calculates determinant of the matrix
     double Matrix::calculate_det() const noexcept {
-
-        double result = 0.0;
+        
+        double result = 1.0;
 
         if (details_.is_triangular_) {
-            for (int i = 0, result = 1.0; i < rows_; i++)
+            for (int i = 0; i < rows_; i++)
                 result *= matrix_[i][i];
             return result;
         }
@@ -679,6 +719,42 @@ namespace matrix {
         for (int i = 0; i < rows_; i++)
             for (int j = 0; j < cols_; j++)
                 matrix_[i][j] = map_function(matrix_[i][j]);
+    }
+
+    // Creates square matrix of specified order filled with zeros
+    // Throws: std::bad_alloc
+    Matrix Matrix::zeros(int order) {
+        try {
+            return { order, SpecType::ZERO };
+        }
+        catch (std::bad_alloc &e) {
+            throw e;
+            return {};
+        }
+    }
+
+    // Creates square matrix of specified order filled with ones
+    // Throws: std::bad_alloc
+    Matrix Matrix::ones(int order) {
+        try {
+            return { order, SpecType::ONE };
+        }
+        catch (std::bad_alloc &e) {
+            throw e;
+            return {};
+        }
+    }
+
+    // Creates identity matrix of specified order
+    // Throws: std::bad_alloc
+    Matrix Matrix::identity(int order) {
+        try {
+            return { order, SpecType::IDENTITY };
+        }
+        catch (std::bad_alloc &e) {
+            throw e;
+            return {};
+        }
     }
 
     // Fills matrix with given arg number
@@ -768,7 +844,7 @@ namespace matrix {
         det_.reset(new double(*(matrix.det_)));
 
         try {
-            allocate_memory();
+            allocate_memory(false);
 
             for (int i = 0; i < matrix.rows_; i++)
                 for (int j = 0; j < matrix.cols_; j++)
@@ -776,19 +852,25 @@ namespace matrix {
         }
         catch (const std::bad_alloc &e) {
             matrix_ = nullptr;
-            throw;
+            throw e;
         }
     }
 
     // Allocates memory for matrix
     // Throws: std::bad_alloc
-    void Matrix::allocate_memory() {
+    void Matrix::allocate_memory(bool init) {
 
         try {
             matrix_ = new double *[rows_];
 
-            for (int i = 0; i < rows_; i++)
-                matrix_[i] = new double[cols_]();
+            if (init) {
+                for (int i = 0; i < rows_; i++)
+                    matrix_[i] = new double[cols_]();
+            }
+            else {
+                for (int i = 0; i < rows_; i++)
+                    matrix_[i] = new double[cols_];
+            }
         }
         catch (const std::bad_alloc &e) {
             matrix_ = nullptr;
