@@ -1,7 +1,7 @@
 # Matrix
 
-Hole Matrix class and it's relative classes are placed into the namespace matrix.
-In the following samples, I'll suppose you've added next line to your code:
+Hole **Matrix** class and it's relative classes are placed into the namespace matrix.
+In the following samples, I'll suppose you've included **matrix.h** to your code and added the following line to your code:
 ```cpp
 using namespace matrix;
 ```
@@ -19,7 +19,7 @@ Matrix zero_matrix(2, 3);
 Matrix random_matrix(2, 3, true, lower_bound, upper_bound);
 ```
 
-There are also special square matrices, which can be created using static function-members of Matrix class:
+There are also special square matrices, which can be created using static function-members of **Matrix** class:
 ```cpp
 Matrix zeros = Matrix::zeros(5); // creates zero matrix of order 5
 Matrix ones = Matrix::ones(5); // creates matrix of order 5 filled with ones
