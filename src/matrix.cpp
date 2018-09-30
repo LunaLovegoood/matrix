@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <new>
+#include <vector>
 #include <random>
 
 
@@ -111,11 +112,11 @@ namespace matrix {
 
         try {
             switch (spec_type) {
-            case SpecType::ZERO: // Creates zeros matrix
+            case SpecType::ZEROS: // Creates zeros matrix
                 allocate_memory();
                 break;
 
-            case SpecType::ONE: // Creates ones matrix
+            case SpecType::ONES: // Creates ones matrix
                 allocate_memory(false);
 
                 for (int i = 0; i < order; i++)
@@ -725,7 +726,7 @@ namespace matrix {
     // Throws: std::bad_alloc
     Matrix Matrix::zeros(int order) {
         try {
-            return { order, SpecType::ZERO };
+            return { order, SpecType::ZEROS };
         }
         catch (std::bad_alloc &e) {
             throw e;
@@ -737,7 +738,7 @@ namespace matrix {
     // Throws: std::bad_alloc
     Matrix Matrix::ones(int order) {
         try {
-            return { order, SpecType::ONE };
+            return { order, SpecType::ONES };
         }
         catch (std::bad_alloc &e) {
             throw e;
@@ -755,6 +756,18 @@ namespace matrix {
             throw e;
             return {};
         }
+    }
+
+    // Returns matrix in form of vector of vectors
+    std::vector< std::vector<double> > Matrix::get_matrix() const {
+
+        std::vector< std::vector<double> > matrix(rows_);
+
+        for (int i = 0; i < rows_; i++)
+            for (int j = 0; j < cols_; j++)
+                matrix[i].push_back(matrix_[i][j]);
+        
+        return matrix;
     }
 
     // Fills matrix with given arg number

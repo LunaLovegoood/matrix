@@ -10,6 +10,7 @@
 #include "matrix_exception.h"
 
 #include <iostream>
+#include <vector>
 #include <memory>
 
 
@@ -48,6 +49,7 @@ namespace matrix {
         static Matrix ones(int order);
         static Matrix identity(int order);
 
+        std::vector< std::vector<double> > get_matrix() const;
         int get_rows() const noexcept { return rows_; }
         int get_cols() const noexcept { return cols_; }
         int get_precision() const noexcept { return precision_; }
@@ -109,7 +111,7 @@ namespace matrix {
 
         mutable std::unique_ptr<double> det_{ nullptr };
 
-        enum class SpecType { ZERO, ONE, IDENTITY }; // Options for special matrix types
+        enum class SpecType { ZEROS, ONES, IDENTITY }; // Options for special matrix types
         Matrix(int order, SpecType spec_type);       // Constructor, which creates special matrices
 
         // Returns true if given matrix is appropriate for addition,subtraction or merging
