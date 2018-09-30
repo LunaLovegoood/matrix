@@ -17,6 +17,8 @@ Matrix zero_matrix(2, 3);
 // creates Matrix with 2 rows and 3 columns filled with random values in between of lower_bound and upper_bound
 // if lower_bound and upper_bound are omitted, then values will be generated in the interval [0;1]
 Matrix random_matrix(2, 3, true, lower_bound, upper_bound);
+// creates Matrix from std::vector of std::vectors
+Matrix vect_matrix(vector_of_vectors);
 ```
 
 There are also special square matrices, which can be created using static function-members of **Matrix** class:

@@ -31,6 +31,7 @@ namespace matrix {
         Matrix(Matrix &&matrix);
         Matrix(int rows, int cols, bool random = false, long lower_bound = 0, long upper_bound = 1);
         Matrix(int rows, int cols, double **matrix);
+        Matrix(std::vector< std::vector<double> > matrix);
         ~Matrix();
 
         Matrix hadm_product(const Matrix &matrix) const;

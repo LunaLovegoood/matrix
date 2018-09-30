@@ -89,8 +89,8 @@ namespace matrix {
         try {
             allocate_memory(false);
 
-            for (int i = 0; i < rows; i++)
-                for (int j = 0; j < cols; j++)
+            for (int i = 0; i < rows_; i++)
+                for (int j = 0; j < cols_; j++)
                     matrix_[i][j] = matrix[i][j];
         }
         catch (const std::bad_alloc &e) {
@@ -98,7 +98,30 @@ namespace matrix {
             return;
         }
 
-        if (rows == cols)
+        if (rows_ == cols_)
+            details_.is_square_ = true;
+    }
+
+    // Constructs matrix from std::vector of std::vectors
+    // Throws: std::bad_alloc
+    Matrix::Matrix(std::vector< std::vector<double> > matrix) 
+    : rows_(matrix.size()), cols_(matrix[0].size()) {
+
+        details_.is_init_ = true;
+
+        try {
+            allocate_memory(false);
+
+            for (int i = 0; i < rows_; i++)
+                for (int j = 0; j < cols_; j++)
+                    matrix_[i][j] = matrix[i][j];
+        }
+        catch (const std::bad_alloc &e) {
+            throw e;
+            return;
+        }
+
+        if (rows_ == cols_)
             details_.is_square_ = true;
     }
 
@@ -758,7 +781,7 @@ namespace matrix {
         }
     }
 
-    // Returns matrix in form of vector of vectors
+    // Returns matrix in form of std::vector of std::vectors
     std::vector< std::vector<double> > Matrix::get_matrix() const {
 
         std::vector< std::vector<double> > matrix(rows_);
@@ -887,6 +910,7 @@ namespace matrix {
         }
         catch (const std::bad_alloc &e) {
             matrix_ = nullptr;
+            details_ = {};
             throw e;
         }
     }
