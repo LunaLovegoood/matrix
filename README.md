@@ -51,7 +51,7 @@ matrix.transpose(); // return transposed matrix
 matrix.map(map_function); // applies map_function to every element of the matrix
 ```
 
-All comparison operators are **deleted**.
+All comparison operators except == are **deleted**.
 
 ### Additional functions
 

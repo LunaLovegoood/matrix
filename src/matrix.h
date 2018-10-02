@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include <memory>
 
 
@@ -33,7 +34,7 @@ namespace matrix {
         Matrix(int rows, int cols, double **matrix);
         Matrix(std::vector< std::vector<double> > matrix);
         ~Matrix();
-
+        
         Matrix hadm_product(const Matrix &matrix) const;
         Matrix transpose() const;
         double det() const;
@@ -84,7 +85,7 @@ namespace matrix {
         Matrix operator-() const;
 
         // Deleted comparison operators
-        bool operator==(const Matrix &matrix) const = delete;
+        bool operator==(const Matrix &matrix) const;
         bool operator<(const Matrix &matrix) const = delete;
         bool operator>(const Matrix &matrix) const = delete;
         bool operator<=(const Matrix &matrix) const = delete;
@@ -108,14 +109,14 @@ namespace matrix {
         int cols_{ 0 };
 
         MatrixDetail details_{};
-        int precision_{ 10 };
+        int precision_{ 8 };
 
         mutable std::unique_ptr<double> det_{ nullptr };
 
         enum class SpecType { ZEROS, ONES, IDENTITY }; // Options for special matrix types
         Matrix(int order, SpecType spec_type);       // Constructor, which creates special matrices
 
-        // Returns true if given matrix is appropriate for addition,subtraction or merging
+        // Returns true if given matrix is appropriate for addition,subtraction, comparison or merging
         bool is_correct_dimensions(const Matrix &arg) const noexcept {
             return ((rows_ == arg.rows_) && (cols_ == arg.cols_));
         }
@@ -126,6 +127,10 @@ namespace matrix {
         // Returns true if calling and given matrix are initialized
         bool are_initialized(const Matrix &arg) const noexcept {
             return ((details_.is_init_) && (arg.is_init()));
+        }
+        // Compares two doubles 
+        bool compare_doubles(double first, double second) const noexcept {
+            return (std::abs(first - second) < 0.000002) ? true : false;
         }
 
         double calculate_det() const noexcept;

@@ -459,6 +459,28 @@ namespace matrix {
         return result;
     }
 
+    // Compares two matrices for equality
+    // Throws: UninitializedMatrix,
+    //         IncorrectDimensions
+    bool Matrix::operator==(const Matrix &matrix) const {
+
+        if (!are_initialized(matrix)) {
+            throw UninitializedMatrix();
+            return {};
+        }
+        else if (!is_correct_mult_dimensions(matrix)) {
+            throw IncorrectDimensions();
+            return {};
+        }
+
+        for (int i = 0; i < rows_; i++)
+            for (int j = 0; j < cols_; j++)
+                if (!compare_doubles(matrix_[i][j], matrix.matrix_[i][j]))
+                    return false;
+
+        return true;
+    }
+
     //
     //
     // Friend functions
@@ -782,7 +804,13 @@ namespace matrix {
     }
 
     // Returns matrix in form of std::vector of std::vectors
+    // Throws: UninitializedMatrix
     std::vector< std::vector<double> > Matrix::get_matrix() const {
+
+        if (!details_.is_init_) {
+            throw UninitializedMatrix();
+            return {};
+        }
 
         std::vector< std::vector<double> > matrix(rows_);
 
