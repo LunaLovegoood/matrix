@@ -8,14 +8,13 @@
 #include <iostream>
 #include <new>
 #include <vector>
+#include <cmath>
 #include <random>
+#include <chrono>
 
 
 namespace {
     using MapFunc = double(*)(double);
-
-    using random_engine = std::mt19937;
-    using uniform_distribution = std::uniform_real_distribution<double>;
 }
 
 
@@ -104,7 +103,7 @@ namespace matrix {
 
     // Constructs matrix from std::vector of std::vectors
     // Throws: std::bad_alloc
-    Matrix::Matrix(std::vector< std::vector<double> > matrix) 
+    Matrix::Matrix(const std::vector< std::vector<double> > &matrix) 
     : rows_(matrix.size()), cols_(matrix[0].size()) {
 
         details_.is_init_ = true;
@@ -462,23 +461,45 @@ namespace matrix {
     // Compares two matrices for equality
     // Throws: UninitializedMatrix,
     //         IncorrectDimensions
-    bool Matrix::operator==(const Matrix &matrix) const {
+    bool operator==(const Matrix &first, const Matrix &second) {
 
-        if (!are_initialized(matrix)) {
+        if (!first.are_initialized(second)) {
             throw UninitializedMatrix();
             return {};
         }
-        else if (!is_correct_mult_dimensions(matrix)) {
+        else if (!first.is_correct_mult_dimensions(second)) {
             throw IncorrectDimensions();
             return {};
         }
 
-        for (int i = 0; i < rows_; i++)
-            for (int j = 0; j < cols_; j++)
-                if (!compare_doubles(matrix_[i][j], matrix.matrix_[i][j]))
+        for (int i = 0; i < first.rows_; i++)
+            for (int j = 0; j < first.cols_; j++)
+                if (!first.compare_doubles(first.matrix_[i][j], second.matrix_[i][j]))
                     return false;
 
         return true;
+    }
+
+    // Compares two matrices for inequality
+    // Throws: UninitializedMatrix,
+    //         IncorrectDimensions
+    bool operator!=(const Matrix &first, const Matrix &second) {
+
+        if (!first.are_initialized(second)) {
+            throw UninitializedMatrix();
+            return {};
+        }
+        else if (!first.is_correct_mult_dimensions(second)) {
+            throw IncorrectDimensions();
+            return {};
+        }
+
+        for (int i = 0; i < first.rows_; i++)
+            for (int j = 0; j < first.cols_; j++)
+                if (!first.compare_doubles(first.matrix_[i][j], second.matrix_[i][j]))
+                    return true;
+
+        return false;
     }
 
     //
@@ -690,6 +711,89 @@ namespace matrix {
         return result;
     }
 
+    // Returns matrix in row echelon matrix
+    // Throws: UninitializedMatrix
+    Matrix Matrix::row_echelon() const {
+
+        if (!details_.is_init_) {
+            throw UninitializedMatrix();
+            return {};
+        }
+        if (rows_ > cols_) {
+            return {};
+        }
+
+        Matrix result = (*this);
+
+        result.forward_eliminate();
+
+        return result;
+    }
+
+    // Reduce matrix to row echelon form
+    int Matrix::forward_eliminate() noexcept {
+
+        for (int current_row = 0, current_col = 0; (current_row < rows_ - 1) && (current_col < cols_); )
+        {
+            int max = max_in_column(current_row, current_col);
+
+            // If column is filled with zeros, then skip to the next column
+            if (!matrix_[max][current_col])
+            {
+                current_col++;
+                continue;
+            }
+
+            swap_rows(current_row, max);
+
+            for (int i = current_row + 1; i < rows_; i++)
+            {
+                double multiplier = matrix_[i][current_col] / matrix_[current_row][current_col];
+
+                for (int j = current_col; j < cols_; j++)
+                {
+                    matrix_[i][j] -= multiplier * matrix_[current_row][j];
+                }
+            }
+
+            current_row++;
+            current_col++;
+        }
+
+        return 0;
+    }
+
+    void Matrix::back_substitution() noexcept {
+        
+    }
+
+    // Swaps to rows in the matrix
+    void Matrix::swap_rows(int first, int second) noexcept 
+    {
+        for (int i = 0; i < cols_; i++) 
+        {
+            double temp = matrix_[first][i];
+            matrix_[first][i] = matrix_[second][i];
+            matrix_[second][i] = temp;
+        }
+    }
+
+    // Finds index of an absolute maximum in the column starting from the specified row
+    int Matrix::max_in_column(int row, int col) noexcept
+    {
+        int max = row;
+
+        for (int i = max + 1; i < rows_; i++)
+        {
+            if (abs(matrix_[i][col]) > abs(matrix_[max][col]))
+            {
+                max = i;
+            }
+        }
+
+        return max;
+    }
+
     // Returns determinant of the matrix
     // Throws: UninitializedMatrix,
     //         DetDoesNotExist
@@ -849,12 +953,13 @@ namespace matrix {
             return;
         }
 
-        random_engine engine;
-        uniform_distribution distribution(lower_bound, upper_bound);
+        unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+        std::mt19937 eng(seed);
+        std::uniform_real_distribution<double> distribution(lower_bound, upper_bound);
 
         for (int i = 0; i < rows_; i++)
             for (int j = 0; j < cols_; j++)
-                matrix_[i][j] = distribution(engine);
+                matrix_[i][j] = distribution(eng);
     }
 
     // Sets number on the position defined by row and col arguments
@@ -905,7 +1010,7 @@ namespace matrix {
         rows_ = matrix.rows_;
         cols_ = matrix.cols_;
         details_ = matrix.details_;
-        det_.reset(new double(*(matrix.det_)));
+        det_.reset(matrix.det_.release());
 
         try {
             allocate_memory(false);

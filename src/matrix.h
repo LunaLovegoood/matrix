@@ -32,11 +32,12 @@ namespace matrix {
         Matrix(Matrix &&matrix);
         Matrix(int rows, int cols, bool random = false, long lower_bound = 0, long upper_bound = 1);
         Matrix(int rows, int cols, double **matrix);
-        Matrix(std::vector< std::vector<double> > matrix);
+        Matrix(const std::vector< std::vector<double> > &matrix);
         ~Matrix();
         
         Matrix hadm_product(const Matrix &matrix) const;
         Matrix transpose() const;
+        Matrix row_echelon() const;
         double det() const;
         void map(MapFunc map_function);
 
@@ -52,9 +53,9 @@ namespace matrix {
         static Matrix identity(int order);
 
         std::vector< std::vector<double> > get_matrix() const;
-        int get_rows() const noexcept { return rows_; }
-        int get_cols() const noexcept { return cols_; }
-        int get_precision() const noexcept { return precision_; }
+        int rows() const noexcept { return rows_; }
+        int cols() const noexcept { return cols_; }
+        int precision() const noexcept { return precision_; }
         bool is_init() const noexcept { return details_.is_init_; }
 
         // Sets matrix precision for output to given precision if it is greater than 0 and less or equal than 25,
@@ -84,12 +85,13 @@ namespace matrix {
         Matrix operator/(const Matrix &matrix) const = delete;
         Matrix operator-() const;
 
-        // Deleted comparison operators
-        bool operator==(const Matrix &matrix) const;
-        bool operator<(const Matrix &matrix) const = delete;
-        bool operator>(const Matrix &matrix) const = delete;
-        bool operator<=(const Matrix &matrix) const = delete;
-        bool operator>=(const Matrix &matrix) const = delete;
+        // Comparison operators
+        friend bool operator==(const Matrix &first, const Matrix &second);
+        friend bool operator!=(const Matrix &first, const Matrix &second);
+        friend bool operator<(const Matrix &first, const Matrix &second) = delete;
+        friend bool operator>(const Matrix &first, const Matrix &second) = delete;
+        friend bool operator<=(const Matrix &first, const Matrix &second) = delete;
+        friend bool operator>=(const Matrix &first, const Matrix &second) = delete;
 
         friend Matrix operator+(const double &number, const Matrix &matrix);
         friend Matrix operator+(const Matrix &matrix, const double &number);
@@ -134,6 +136,11 @@ namespace matrix {
         }
 
         double calculate_det() const noexcept;
+
+        int forward_eliminate() noexcept;
+        void back_substitution() noexcept;
+        void swap_rows(int first, int second) noexcept;
+        int max_in_column(int row, int col) noexcept;
 
         void set_default() noexcept;
 
