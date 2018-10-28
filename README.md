@@ -1,6 +1,6 @@
 # Matrix
 
-Hole **Matrix** class and it's relative classes are placed into the namespace matrix.
+Whole **Matrix** class and it's relative classes are placed into the namespace matrix.
 In the following samples, I'll suppose you've included **matrix.h** to your code and added the following line to your code:
 ```cpp
 using namespace matrix;
