@@ -37,14 +37,18 @@ namespace matrix {
         
         Matrix hadm_product(const Matrix &matrix) const;
         Matrix transpose() const;
+        Matrix inverse_matrix() const;
         Matrix row_echelon() const;
+        Matrix reduced_row_echelon() const;
         double det() const;
         void map(MapFunc map_function);
 
         Matrix merge(const Matrix &matrix) const;
+        Matrix split(int first_row, int first_col, int second_row, int second_col) const;
         void fill(const double &arg);
         void fill_random(long lower_bound = 0, long upper_bound = 1);
         void set_element(int row, int col, const double &number);
+        double get_element(int row, int col) const;
         void copy(const Matrix &matrix);
 
         // Creating special matrices
@@ -137,7 +141,7 @@ namespace matrix {
 
         double calculate_det() const noexcept;
 
-        int forward_eliminate() noexcept;
+        double forward_eliminate() noexcept;
         void back_substitution() noexcept;
         void swap_rows(int first, int second) noexcept;
         int max_in_column(int row, int col) noexcept;

@@ -629,9 +629,14 @@ namespace matrix {
 
         stream << matrix.rows_ << " " << matrix.cols_ << " " << matrix.details_ << "\n";
 
-        for (int i = 0; i < matrix.rows_; i++) {
-            for (int j = 0; j < matrix.cols_; j++)
+        for (int i = 0; i < matrix.rows_; i++) 
+        {
+            for (int j = 0; j < matrix.cols_; j++) 
+            {
+                stream.precision(5);
+                stream.width(10);
                 stream << matrix.matrix_[i][j] << " ";
+            }
             stream << "\n";
         }
 
@@ -711,15 +716,41 @@ namespace matrix {
         return result;
     }
 
-    // Returns matrix in row echelon matrix
-    // Throws: UninitializedMatrix
-    Matrix Matrix::row_echelon() const {
-
-        if (!details_.is_init_) {
+    // Returns iverse of the matrix if exists
+    // Throws: UninitializedMatrix,
+    //         InverseDoesNotExist
+    Matrix Matrix::inverse_matrix() const
+    {
+        if (!details_.is_init_) 
+        {
             throw UninitializedMatrix();
             return {};
         }
-        if (rows_ > cols_) {
+        if (!details_.is_square_)
+        {
+            throw InverseDoesNotExist();
+            return {};
+        }
+        if (!det())
+        {
+            throw InverseDoesNotExist();
+            return {};
+        }
+
+        return this->merge(Matrix::identity(rows_)).reduced_row_echelon().split(0, cols_, rows_, cols_ * 2);
+    }
+
+    // Returns matrix in row echelon matrix
+    // Throws: UninitializedMatrix
+    Matrix Matrix::row_echelon() const 
+    {
+        if (!details_.is_init_) 
+        {
+            throw UninitializedMatrix();
+            return {};
+        }
+        if (rows_ > cols_) 
+        {
             return {};
         }
 
@@ -730,8 +761,32 @@ namespace matrix {
         return result;
     }
 
+    // Returns matrix in reduced row echelon matrix
+    // Throws: UninitializedMatrix
+    Matrix Matrix::reduced_row_echelon() const
+    {
+        if (!details_.is_init_)
+        {
+            throw UninitializedMatrix();
+            return {};
+        }
+        if (rows_ > cols_)
+        {
+            return {};
+        }
+
+        Matrix result = (*this);
+
+        result.forward_eliminate();
+        result.back_substitution();
+
+        return result;
+    }
+
     // Reduce matrix to row echelon form
-    int Matrix::forward_eliminate() noexcept {
+    double Matrix::forward_eliminate() noexcept 
+    {
+        double product_of_multipliers{ 1.0 };
 
         for (int current_row = 0, current_col = 0; (current_row < rows_ - 1) && (current_col < cols_); )
         {
@@ -744,7 +799,11 @@ namespace matrix {
                 continue;
             }
 
-            swap_rows(current_row, max);
+            if (current_row != max)
+            {
+                swap_rows(current_row, max);
+                product_of_multipliers *= (-1);
+            }
 
             for (int i = current_row + 1; i < rows_; i++)
             {
@@ -760,16 +819,52 @@ namespace matrix {
             current_col++;
         }
 
-        return 0;
+        details_.is_triangular_ = true;
+
+        return product_of_multipliers;
     }
 
-    void Matrix::back_substitution() noexcept {
-        
+    // Reduce matrix to reduced row echelon form
+    void Matrix::back_substitution() noexcept 
+    {
+        for (int current_row = rows_ - 1, current_col = 0; current_row >= 0; current_row--, current_col = 0)
+        {
+            // Find pivot element
+            while (!matrix_[current_row][current_col] && current_col < cols_) { current_col++; }
+
+            // Check if current row is filled with zeros
+            if (current_col == cols_)
+            {
+                continue;
+            }
+
+            // Make zeros above pivot the element
+            for (int i = current_row - 1; i >= 0; i--)
+            {
+                double multiplier = matrix_[i][current_col] / matrix_[current_row][current_col];
+
+                for (int j = current_col; j < cols_; j++)
+                {
+                    matrix_[i][j] -= multiplier * matrix_[current_row][j];
+                }
+            }
+
+            // Make pivot element equal to 1
+            for (int i = cols_ - 1; i >= current_col; i--)
+            {
+                matrix_[current_row][i] /= matrix_[current_row][current_col];
+            }
+        }
     }
 
     // Swaps to rows in the matrix
     void Matrix::swap_rows(int first, int second) noexcept 
     {
+        if (first == second)
+        {
+            return;
+        }
+
         for (int i = 0; i < cols_; i++) 
         {
             double temp = matrix_[first][i];
@@ -816,25 +911,34 @@ namespace matrix {
     }
 
     // Calculates determinant of the matrix
-    double Matrix::calculate_det() const noexcept {
-        
+    double Matrix::calculate_det() const noexcept 
+    {
         double result = 1.0;
 
-        if (details_.is_triangular_) {
+        if (details_.is_triangular_) 
+        {
             for (int i = 0; i < rows_; i++)
                 result *= matrix_[i][i];
-            return result;
         }
-        
-        // TODO: implement common determinant
-        return 0.0;
+        else 
+        {
+            Matrix temp{ *this };
+            double product_of_multipliers = temp.forward_eliminate();
+
+            for (int i = 0; i < rows_; i++)
+                result *= temp.matrix_[i][i];
+
+            result /= product_of_multipliers;
+        }
+
+        return result;
     }
 
     // Returns merged matrix
     // Throws: UninitializedMatrix,
     //         IncorrectDimensions
-    Matrix Matrix::merge(const Matrix &matrix) const {
-        
+    Matrix Matrix::merge(const Matrix &matrix) const 
+    {
         if (!are_initialized(matrix)) {
             throw UninitializedMatrix();
             return {};
@@ -853,6 +957,47 @@ namespace matrix {
         for (int i = 0; i < rows_; i++)
             for (int j = cols_, k = 0; j < result.cols_; j++, k++)
                 result.matrix_[i][j] = matrix.matrix_[i][k];
+
+        return result;
+    }
+
+    // Returns part of the matrix
+    // Upper left corner is specified by first_row and first_col (first_row and first_col are included)
+    // Lower right corner is specified by second_row and second_col (second_row and second_col are included)
+    // Throws: UninitializedMatrix
+    //         MatrixOutOfBounds
+    //         IncorrectDimensions
+    Matrix Matrix::split(int first_row, int first_col, int second_row, int second_col) const
+    {
+        if (!details_.is_init_) 
+        {
+            throw UninitializedMatrix();
+            return {};
+        }
+        if ( first_row < 0 || first_row  > rows_ ||
+            second_row < 0 || second_row > rows_ ||
+             first_col < 0 || first_col  > cols_ ||
+            second_col < 0 || second_col > cols_ )
+        {
+            throw MatrixOutOfBounds();
+            return {};
+        }
+        if (first_row > second_row ||
+            first_col > second_col)
+        {
+            throw IncorrectDimensions();
+            return {};
+        }
+
+        Matrix result(second_row - first_row, second_col - first_col);
+
+        for (int i = first_row; i < second_row; i++)
+        {
+            for (int j = first_col; j < second_col; j++)
+            {
+                result.matrix_[i - first_row][j - first_col] = matrix_[i][j];
+            }
+        }
 
         return result;
     }
@@ -980,6 +1125,24 @@ namespace matrix {
         matrix_[row][col] = number;
     }
 
+    // Returns number from the position defined by row and col arguments
+    // Throws: UninitializedMatrix,
+    //         MatrixOutOfBounds
+    double Matrix::get_element(int row, int col) const
+    {
+        if (!details_.is_init_) {
+            throw UninitializedMatrix();
+            return 0.0;
+        }
+        else if (row < 0 || row >= rows_ ||
+            col < 0 || col >= cols_) {
+            throw MatrixOutOfBounds();
+            return 0.0;
+        }
+
+        return matrix_[row][col];
+    }
+
     // Sets default values to matrix members
     void Matrix::set_default() noexcept {
 
@@ -1005,12 +1168,16 @@ namespace matrix {
 
     // Copies given matrix arg into invoking one
     // Throws: std::bad_alloc
-    void Matrix::copy(const Matrix &matrix) {
-
+    void Matrix::copy(const Matrix &matrix) 
+    {
         rows_ = matrix.rows_;
         cols_ = matrix.cols_;
         details_ = matrix.details_;
-        det_.reset(matrix.det_.release());
+        
+        if (matrix.det_)
+        {
+            det_.reset(new double(*(matrix.det_)));
+        }
 
         try {
             allocate_memory(false);
