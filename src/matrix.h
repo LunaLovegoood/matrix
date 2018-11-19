@@ -12,6 +12,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <functional>
+#include <cstddef>
 #include <memory>
 
 
@@ -108,6 +110,7 @@ namespace matrix {
 
         friend std::ostream& operator<<(std::ostream &stream, const Matrix &matrix);
         friend std::istream& operator>>(std::istream &stream, Matrix &matrix);
+        friend std::hash<Matrix>;
 
     private:
         double **matrix_{ nullptr };
@@ -154,5 +157,31 @@ namespace matrix {
 
 }
 
+
+namespace std
+{
+    template <>
+    struct hash<matrix::Matrix>
+    {
+        typedef matrix::Matrix argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(const argument_type &arg)
+        {
+            result_type hash_value{};
+            std::hash<double> double_hash{};
+
+            for (int i = 0; i < arg.rows_; i++)
+            {
+                for (int j = 0; j < arg.cols_; j++)
+                {
+                    hash_value ^= double_hash(arg.matrix_[i][j]);
+                }
+            }
+
+            return hash_value;
+        }
+    };
+}
 
 #endif // MATRIX_H_
