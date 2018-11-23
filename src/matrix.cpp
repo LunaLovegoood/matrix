@@ -11,6 +11,7 @@
 #include <cmath>
 #include <random>
 #include <chrono>
+#include <cstring>
 
 
 namespace {
@@ -104,8 +105,8 @@ namespace matrix {
     // Constructs matrix from std::vector of std::vectors
     // Throws: std::bad_alloc
     Matrix::Matrix(const std::vector< std::vector<double> > &matrix) 
-    : rows_(matrix.size()), cols_(matrix[0].size()) {
-
+        : rows_(matrix.size()), cols_(matrix[0].size()) 
+    {
         details_.is_init_ = true;
 
         try {
@@ -1098,7 +1099,7 @@ namespace matrix {
             return;
         }
 
-        unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+        unsigned seed = static_cast<unsigned>(std::chrono::steady_clock::now().time_since_epoch().count());
         std::mt19937 eng(seed);
         std::uniform_real_distribution<double> distribution(lower_bound, upper_bound);
 
@@ -1179,14 +1180,17 @@ namespace matrix {
             det_.reset(new double(*(matrix.det_)));
         }
 
-        try {
+        try 
+        {
             allocate_memory(false);
 
-            for (int i = 0; i < matrix.rows_; i++)
-                for (int j = 0; j < matrix.cols_; j++)
-                    matrix_[i][j] = matrix.matrix_[i][j];
+            for (int i = 0; i < rows_; i++)
+            {
+                std::memcpy(matrix_[i], matrix.matrix_[i], sizeof(double) * cols_);
+            }
         }
-        catch (const std::bad_alloc &e) {
+        catch (const std::bad_alloc &e) 
+        {
             matrix_ = nullptr;
             throw e;
         }
